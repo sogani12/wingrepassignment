@@ -1,0 +1,183 @@
+{
+  "version": "v0_initial",
+  "updated_at": "2026-06-04",
+  "nodes": [
+    {
+      "id": "obj_core_requirements",
+      "type": "objective",
+      "label": "Core requirements work reliably",
+      "description": "All spec items (blocks, pages, DnD, formatting, persistence) function without data loss."
+    },
+    {
+      "id": "obj_reviewable_in_2min",
+      "type": "objective",
+      "label": "Reviewable in two minutes",
+      "description": "A reviewer can grasp the product immediately: create a page, edit blocks, refresh, content remains."
+    },
+    {
+      "id": "obj_show_decision_process",
+      "type": "objective",
+      "label": "Visible decision process",
+      "description": "README and decision graph explain tradeoffs, cuts, and rationale — not just the final code."
+    },
+    {
+      "id": "req_blocks",
+      "type": "requirement",
+      "label": "Block-based editor",
+      "description": "Users can create, edit, and delete content blocks (text, headings, bullet lists at minimum).",
+      "is_functional": true
+    },
+    {
+      "id": "req_pages",
+      "type": "requirement",
+      "label": "Multiple pages",
+      "description": "Users can create and navigate between pages.",
+      "is_functional": true
+    },
+    {
+      "id": "req_dnd",
+      "type": "requirement",
+      "label": "Drag-and-drop reorder",
+      "description": "Users can reorder blocks within a page via drag-and-drop.",
+      "is_functional": true
+    },
+    {
+      "id": "req_formatting",
+      "type": "requirement",
+      "label": "Basic text formatting",
+      "description": "Users can apply bold, italic, and similar inline formatting within blocks.",
+      "is_functional": true
+    },
+    {
+      "id": "req_persistence",
+      "type": "requirement",
+      "label": "Survive page refresh",
+      "description": "Content must persist across browser refresh. localStorage is sufficient.",
+      "is_functional": true
+    },
+    {
+      "id": "dec_vite",
+      "type": "decision",
+      "label": "Use Vite + React + TypeScript",
+      "description": "Client-side SPA scaffold for fastest path to a working editor.",
+      "rationale": "Avoids Next.js hydration complexity for a localStorage-only app. Speed over prestige.",
+      "alternatives_considered": ["Next.js", "Remix"]
+    },
+    {
+      "id": "dec_blocknote",
+      "type": "decision",
+      "label": "Use BlockNote for the editor",
+      "description": "Block-based editor library built on TipTap/ProseMirror instead of a custom contenteditable implementation.",
+      "rationale": "Block editor from scratch is the highest schedule risk. BlockNote provides blocks, slash menu, DnD, and formatting.",
+      "alternatives_considered": ["TipTap directly", "Lexical", "Slate", "custom contenteditable"]
+    },
+    {
+      "id": "dec_zustand_localstorage",
+      "type": "decision",
+      "label": "Zustand + localStorage persistence",
+      "description": "Single app-state store debounced to localStorage on change.",
+      "rationale": "Minimal boilerplate, one source of truth, no backend required for core spec.",
+      "alternatives_considered": ["React Context only", "IndexedDB", "backend API"]
+    },
+    {
+      "id": "dec_tailwind",
+      "type": "decision",
+      "label": "Tailwind CSS for styling",
+      "description": "Utility-first CSS for fast layout and polish without a separate design system build-out.",
+      "rationale": "Fast iteration on sidebar, page chrome, and empty states.",
+      "alternatives_considered": ["CSS modules", "styled-components", "shadcn/ui"]
+    },
+    {
+      "id": "asm_blocknote_fits",
+      "type": "assumption",
+      "label": "BlockNote covers required block types",
+      "description": "Assumes BlockNote provides paragraph, heading, bullet, DnD, and inline formatting out of the box.",
+      "confidence": 0.7,
+      "validated": false
+    },
+    {
+      "id": "risk_editor_complexity",
+      "type": "risk",
+      "label": "Custom editor blows timeline",
+      "description": "Building a block editor from scratch could consume the entire 48h budget.",
+      "severity": 0.9
+    },
+    {
+      "id": "risk_dnd_state",
+      "type": "risk",
+      "label": "DnD fights editor internal state",
+      "description": "Custom drag-and-drop integration may conflict with BlockNote's built-in reordering.",
+      "severity": 0.6
+    },
+    {
+      "id": "risk_storage_migration",
+      "type": "risk",
+      "label": "Schema changes break saved data",
+      "description": "Evolving the app-state shape without migration logic could wipe user content on refresh.",
+      "severity": 0.5
+    },
+    {
+      "id": "risk_ai_scope",
+      "type": "risk",
+      "label": "AI feature eats polish time",
+      "description": "Adding an AI integration before core requirements work could delay deploy and UX polish.",
+      "severity": 0.7
+    },
+    {
+      "id": "q_block_library",
+      "type": "question",
+      "label": "Does BlockNote cover all required block types and DnD?",
+      "description": "Needs a short spike to confirm paragraph, heading, bullet, formatting, and reorder work as expected.",
+      "status": "open",
+      "priority": "high",
+      "blocks": []
+    },
+    {
+      "id": "q_nested_blocks",
+      "type": "question",
+      "label": "Should blocks support nesting?",
+      "description": "Unclear whether nested bullets/outlines are worth the complexity in 48h.",
+      "status": "open",
+      "priority": "high",
+      "blocks": []
+    },
+    {
+      "id": "q_page_routing",
+      "type": "question",
+      "label": "URL-based page navigation?",
+      "description": "Single route with sidebar state vs /p/:id URLs for shareable links.",
+      "status": "open",
+      "priority": "medium",
+      "blocks": []
+    },
+    {
+      "id": "q_ai_scope",
+      "type": "question",
+      "label": "Ship AI in 48h or defer?",
+      "description": "Whether to add a block-transforming AI feature or document it as v2.",
+      "status": "open",
+      "priority": "medium",
+      "blocks": []
+    },
+    {
+      "id": "q_title_editing",
+      "type": "question",
+      "label": "Inline editable page title at top?",
+      "description": "Whether the page title is edited in the main canvas header vs sidebar only.",
+      "status": "open",
+      "priority": "low",
+      "blocks": []
+    }
+  ],
+  "edges": [
+    { "type": "motivated_by", "source": "dec_vite", "target": "obj_core_requirements" },
+    { "type": "motivated_by", "source": "dec_blocknote", "target": "obj_core_requirements" },
+    { "type": "motivated_by", "source": "dec_blocknote", "target": "obj_reviewable_in_2min" },
+    { "type": "assumes", "source": "dec_blocknote", "target": "asm_blocknote_fits" },
+    { "type": "conflicts_with", "source": "risk_editor_complexity", "target": "req_blocks" },
+    { "type": "conflicts_with", "source": "risk_dnd_state", "target": "req_dnd" },
+    { "type": "conflicts_with", "source": "risk_storage_migration", "target": "req_persistence" },
+    { "type": "conflicts_with", "source": "risk_ai_scope", "target": "obj_core_requirements" },
+    { "type": "invalidates", "source": "risk_dnd_state", "target": "asm_blocknote_fits" }
+  ]
+}
