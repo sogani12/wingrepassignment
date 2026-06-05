@@ -1,26 +1,45 @@
+import { useEffect, useRef } from "react";
 import { getActivePage, usePageStore } from "../store/pageStore";
+import { EmptyState } from "./EmptyState";
 import { PageEditor } from "./PageEditor";
 
 export function PageCanvas() {
   const pages = usePageStore((state) => state.pages);
   const activePageId = usePageStore((state) => state.activePageId);
-  const hydrated = usePageStore((state) => state.hydrated);
+  const focusTarget = usePageStore((state) => state.focusTarget);
   const renamePage = usePageStore((state) => state.renamePage);
+  const createNewPage = usePageStore((state) => state.createNewPage);
+  const clearFocusTarget = usePageStore((state) => state.clearFocusTarget);
 
+  const titleRef = useRef<HTMLInputElement>(null);
   const activePage = getActivePage(pages, activePageId);
 
-  if (!hydrated) {
+  useEffect(() => {
+    if (focusTarget === "title") {
+      titleRef.current?.focus();
+      if (activePage?.title) {
+        titleRef.current?.select();
+      }
+      clearFocusTarget();
+    }
+  }, [focusTarget, activePage?.id, activePage?.title, clearFocusTarget]);
+
+  if (!activePage) {
     return (
-      <main className="flex flex-1 items-center justify-center text-sm text-neutral-500">
-        Loading…
-      </main>
+      <EmptyState
+        title="No pages yet"
+        description="Create a page to start writing, or restore one from trash."
+        actionLabel="Create page"
+        onAction={createNewPage}
+      />
     );
   }
 
   return (
-    <main className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+    <main className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-white">
       <div className="mx-auto w-full max-w-3xl px-8 py-10">
         <input
+          ref={titleRef}
           type="text"
           value={activePage.title}
           onChange={(event) => renamePage(activePage.id, event.target.value)}

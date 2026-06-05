@@ -1,6 +1,6 @@
 {
   "version": "live",
-  "updated_at": "2026-06-05",
+  "updated_at": "2026-06-05-polish",
   "nodes": [
     {
       "id": "obj_core_requirements",
@@ -112,6 +112,22 @@
       "alternatives_considered": ["@dnd-kit custom integration"]
     },
     {
+      "id": "dec_soft_delete_trash",
+      "type": "decision",
+      "label": "Soft delete with 30-day trash retention",
+      "description": "Pages get deletedAt timestamp instead of hard delete; purge on app load after 30 days.",
+      "rationale": "Safer UX, enables restore, matches Notion mental model without a backend.",
+      "alternatives_considered": ["Hard delete only", "IndexedDB archive"]
+    },
+    {
+      "id": "dec_simplified_library",
+      "type": "decision",
+      "label": "Simplified library table (not full database)",
+      "description": "Library view shows title, preview, dates with search/sort/column toggles — no custom properties or filter builder.",
+      "rationale": "Notion library power comes from databases we don't have. Table over existing page metadata gives 80% value at 20% cost.",
+      "alternatives_considered": ["Full filter builder", "Skip library view"]
+    },
+    {
       "id": "ux_inline_title",
       "type": "ux_decision",
       "label": "Editable page title in canvas header",
@@ -132,18 +148,38 @@
       "validation_status": "tested"
     },
     {
+      "id": "ux_delete_confirm",
+      "type": "ux_decision",
+      "label": "Confirm before moving to trash",
+      "description": "Modal confirms page deletion before soft-delete.",
+      "user_problem": "Accidental page deletion is frustrating and hard to recover from without trash.",
+      "chosen_behavior": "Modal with Move to trash / Cancel; separate confirm for delete forever in trash.",
+      "alternatives_considered": ["Undo toast only", "Instant delete with trash auto-restore"],
+      "validation_status": "validated"
+    },
+    {
+      "id": "ux_sidebar_search",
+      "type": "ux_decision",
+      "label": "Sidebar search by title and preview",
+      "description": "Filter active pages in sidebar as user types.",
+      "user_problem": "Page list grows unwieldy without search.",
+      "chosen_behavior": "Search input in sidebar header; matches title and first block preview text.",
+      "alternatives_considered": ["Library-only search", "Cmd+K command palette"],
+      "validation_status": "validated"
+    },
+    {
       "id": "iface_app_state",
       "type": "interface",
       "label": "Application state schema",
       "description": "Single source of truth for pages and active page id, persisted to localStorage.",
-      "contract": "{ pages: Page[], activePageId: string } where Page = { id, title, content: Block[], updatedAt }"
+      "contract": "{ pages: Page[], activePageId: string | null } where Page = { id, title, content: Block[], createdAt, updatedAt, deletedAt: string | null }"
     },
     {
       "id": "comp_page_store",
       "type": "component",
       "label": "Page store",
       "description": "Zustand store with persist middleware for pages, navigation, and content updates.",
-      "file_refs": ["src/store/pageStore.ts", "src/types/page.ts", "src/lib/defaultPage.ts"],
+      "file_refs": ["src/store/pageStore.ts", "src/types/page.ts", "src/lib/defaultPage.ts", "src/lib/pageUtils.ts"],
       "has_tests": false
     },
     {
@@ -158,8 +194,40 @@
       "id": "comp_sidebar",
       "type": "component",
       "label": "Sidebar",
-      "description": "Page list navigation, create and delete pages.",
+      "description": "Page list navigation, search, sort, create, trash confirm, view switcher.",
       "file_refs": ["src/components/Sidebar.tsx"],
+      "has_tests": false
+    },
+    {
+      "id": "comp_library_view",
+      "type": "component",
+      "label": "Library view",
+      "description": "Table of all active pages with search, sort, and column visibility toggles.",
+      "file_refs": ["src/components/LibraryView.tsx"],
+      "has_tests": false
+    },
+    {
+      "id": "comp_trash_view",
+      "type": "component",
+      "label": "Trash view",
+      "description": "Lists trashed pages with restore, delete forever, and days-until-purge.",
+      "file_refs": ["src/components/TrashView.tsx"],
+      "has_tests": false
+    },
+    {
+      "id": "comp_confirm_modal",
+      "type": "component",
+      "label": "Confirm modal",
+      "description": "Reusable confirmation dialog for destructive actions.",
+      "file_refs": ["src/components/ConfirmModal.tsx"],
+      "has_tests": false
+    },
+    {
+      "id": "comp_empty_state",
+      "type": "component",
+      "label": "Empty state",
+      "description": "Placeholder UI for no pages, no results, and empty trash.",
+      "file_refs": ["src/components/EmptyState.tsx"],
       "has_tests": false
     },
     {
@@ -198,6 +266,39 @@
       "label": "Schema changes break saved data",
       "description": "Evolving the app-state shape without migration logic could wipe user content on refresh.",
       "severity": 0.5
+    },
+    {
+      "id": "risk_hydration_race",
+      "type": "risk",
+      "label": "Persist hydration race crashes UI",
+      "description": "Rendering before rehydration completes, or re-normalizing state in onRehydrateStorage, can flash seed data then crash or hang on Loading.",
+      "severity": 0.75
+    },
+    {
+      "id": "dec_hydration_gate",
+      "type": "decision",
+      "label": "Gate App on persist.onFinishHydration",
+      "description": "useStoreHydration hook waits for Zustand persist before rendering; normalization runs in merge/migrate only.",
+      "rationale": "Avoids seed-data flicker and broken setHydrated callback. Official persist pattern for React SPAs.",
+      "alternatives_considered": ["hydrated flag in store via onRehydrateStorage", "render immediately with seed data"]
+    },
+    {
+      "id": "ux_no_render_before_hydration",
+      "type": "ux_decision",
+      "label": "Full-app loading gate until storage hydrates",
+      "description": "Show Loading until localStorage rehydration finishes; never flash seed pages over saved data.",
+      "user_problem": "Users see wrong content flicker on reload, or a blank screen if hydration breaks.",
+      "chosen_behavior": "App-level gate via useStoreHydration; single Loading state.",
+      "alternatives_considered": ["Gate only PageCanvas", "No gate (accept flicker)"],
+      "validation_status": "validated"
+    },
+    {
+      "id": "tst_reload_persistence",
+      "type": "test",
+      "label": "Reload persistence smoke test",
+      "description": "Manual: edit page, reload, confirm content and active page restore with no white screen or seed flicker.",
+      "test_type": "integration",
+      "status": "planned"
     },
     {
       "id": "risk_ai_scope",
@@ -274,10 +375,20 @@
     { "type": "depends_on", "source": "comp_page_canvas", "target": "comp_page_editor" },
     { "type": "depends_on", "source": "comp_page_canvas", "target": "comp_page_store" },
     { "type": "depends_on", "source": "comp_sidebar", "target": "comp_page_store" },
+    { "type": "depends_on", "source": "comp_library_view", "target": "comp_page_store" },
+    { "type": "depends_on", "source": "comp_trash_view", "target": "comp_page_store" },
+    { "type": "depends_on", "source": "comp_sidebar", "target": "comp_confirm_modal" },
+    { "type": "depends_on", "source": "comp_trash_view", "target": "comp_confirm_modal" },
+    { "type": "motivated_by", "source": "dec_soft_delete_trash", "target": "obj_reviewable_in_2min" },
+    { "type": "motivated_by", "source": "dec_simplified_library", "target": "obj_reviewable_in_2min" },
     { "type": "depends_on", "source": "comp_page_editor", "target": "dec_blocknote" },
     { "type": "conflicts_with", "source": "risk_editor_complexity", "target": "req_blocks" },
     { "type": "conflicts_with", "source": "risk_dnd_state", "target": "req_dnd" },
     { "type": "conflicts_with", "source": "risk_storage_migration", "target": "req_persistence" },
+    { "type": "conflicts_with", "source": "risk_hydration_race", "target": "req_persistence" },
+    { "type": "resolves", "source": "dec_hydration_gate", "target": "risk_hydration_race" },
+    { "type": "guards_against", "source": "tst_reload_persistence", "target": "risk_hydration_race" },
+    { "type": "guards_against", "source": "tst_reload_persistence", "target": "risk_storage_migration" },
     { "type": "conflicts_with", "source": "risk_ai_scope", "target": "obj_core_requirements" }
   ]
 }

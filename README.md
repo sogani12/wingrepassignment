@@ -18,8 +18,9 @@ Open [http://localhost:5173](http://localhost:5173).
 - **Zustand + localStorage** — persistence across refresh
 - **Tailwind CSS** — layout and chrome
 
-## What's working (v1)
+## What's working
 
+**Core (spec)**
 - Block-based editor with text, headings, bullet lists
 - Bold and italic inline formatting
 - Drag-and-drop block reorder (BlockNote built-in handles)
@@ -27,11 +28,19 @@ Open [http://localhost:5173](http://localhost:5173).
 - Editable page title in the canvas
 - Content persists to localStorage on change
 
+**Polish**
+- Delete confirmation → soft delete to trash
+- Trash with restore, delete forever, and 30-day auto-purge on app load
+- Sidebar search and sort (last edited / A–Z)
+- Library view — table with search, sort, and column visibility toggles
+- Empty states for no pages, no search results, and empty trash
+- Focus title input when creating or restoring a page
+
 ## Decisions & tradeoffs
 
 See `docs/decision-graph/` for the live decision graph, changelog, and milestone checkpoints.
 
-**Intentionally skipped for v1:** nested block outlines, URL-based routing, AI features, backend sync.
+**Intentionally skipped:** full Notion database filters, URL-based routing, AI features, backend sync.
 
 ## Scripts
 

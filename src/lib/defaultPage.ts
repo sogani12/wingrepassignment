@@ -15,12 +15,15 @@ export function createEmptyBlock(): Block {
   };
 }
 
-export function createPage(title = "Untitled"): Page {
+export function createPage(title = ""): Page {
+  const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
     title,
     content: [createEmptyBlock()],
-    updatedAt: new Date().toISOString(),
+    createdAt: now,
+    updatedAt: now,
+    deletedAt: null,
   };
 }
 
