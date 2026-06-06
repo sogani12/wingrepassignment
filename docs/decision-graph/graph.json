@@ -99,9 +99,17 @@
       "id": "dec_single_route",
       "type": "decision",
       "label": "Single-route SPA navigation",
-      "description": "One URL with sidebar state for active page; no /p/:id routes in v1.",
-      "rationale": "Faster to ship; URL routing is polish not a spec requirement.",
+      "description": "SUPERSEDED by dec_react_router. Was: one URL with sidebar state only.",
+      "rationale": "Initially deferred for speed; replaced once polish phase began.",
       "alternatives_considered": ["React Router with /p/:id", "hash-based routing"]
+    },
+    {
+      "id": "dec_react_router",
+      "type": "decision",
+      "label": "React Router URL routing",
+      "description": "Routes: /p/:pageId (editor), /library, /trash. RouteSync validates page ids on load.",
+      "rationale": "Shareable page URLs and browser back/forward; standard SPA pattern with vercel.json rewrites.",
+      "alternatives_considered": ["hash routing", "keep single-route state"]
     },
     {
       "id": "dec_blocknote_builtin_dnd",
@@ -293,6 +301,16 @@
       "validation_status": "validated"
     },
     {
+      "id": "ux_collapsible_sidebar",
+      "type": "ux_decision",
+      "label": "Collapsible sidebar with icon rail",
+      "description": "Sidebar collapses to 56px icon rail; preference persisted in localStorage.",
+      "user_problem": "Users want more canvas space without losing quick nav.",
+      "chosen_behavior": "« / » toggle; collapsed rail shows New, Pages, Library, Trash.",
+      "alternatives_considered": ["Overlay drawer", "Fully hidden sidebar"],
+      "validation_status": "validated"
+    },
+    {
       "id": "tst_reload_persistence",
       "type": "test",
       "label": "Reload persistence smoke test",
@@ -329,8 +347,8 @@
       "id": "q_page_routing",
       "type": "question",
       "label": "URL-based page navigation?",
-      "description": "Deferred to v2; single-route SPA chosen for speed.",
-      "status": "deferred",
+      "description": "Resolved: react-router-dom with /p/:pageId, /library, /trash.",
+      "status": "resolved",
       "priority": "medium",
       "blocks": []
     },
@@ -360,7 +378,8 @@
     { "type": "assumes", "source": "dec_blocknote", "target": "asm_blocknote_fits" },
     { "type": "resolves", "source": "dec_blocknote", "target": "q_block_library" },
     { "type": "resolves", "source": "dec_flat_blocks_v1", "target": "q_nested_blocks" },
-    { "type": "resolves", "source": "dec_single_route", "target": "q_page_routing" },
+    { "type": "resolves", "source": "dec_react_router", "target": "q_page_routing" },
+    { "type": "motivated_by", "source": "dec_react_router", "target": "obj_reviewable_in_2min" },
     { "type": "resolves", "source": "ux_inline_title", "target": "q_title_editing" },
     { "type": "resolves", "source": "dec_blocknote_builtin_dnd", "target": "q_block_library" },
     { "type": "implements", "source": "comp_page_editor", "target": "req_blocks" },

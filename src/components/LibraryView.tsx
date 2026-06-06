@@ -1,14 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  formatDate,
-  formatRelativeTime,
-  getActivePages,
-  getPagePreview,
-  matchesSearch,
-} from "../lib/pageUtils";
+import { getActivePages, matchesSearch } from "../lib/pageUtils";
 import type { LibrarySortKey, Page } from "../types/page";
+import { useAppNavigate } from "../hooks/useAppNavigate";
 import { usePageStore } from "../store/pageStore";
 import { EmptyState } from "./EmptyState";
+import { LibraryPageRow } from "./LibraryPageRow";
 
 export function LibraryView() {
   const pages = usePageStore((state) => state.pages);
@@ -19,8 +15,7 @@ export function LibraryView() {
   const setLibrarySearch = usePageStore((state) => state.setLibrarySearch);
   const setLibrarySort = usePageStore((state) => state.setLibrarySort);
   const toggleLibraryProperty = usePageStore((state) => state.toggleLibraryProperty);
-  const setActivePage = usePageStore((state) => state.setActivePage);
-  const createNewPage = usePageStore((state) => state.createNewPage);
+  const { toPage, createPage } = useAppNavigate();
 
   const [propertiesOpen, setPropertiesOpen] = useState(false);
   const propertiesRef = useRef<HTMLDivElement>(null);
@@ -62,7 +57,7 @@ export function LibraryView() {
         title="No pages yet"
         description="Create your first page to see it in the library."
         actionLabel="Create page"
-        onAction={createNewPage}
+        onAction={createPage}
       />
     );
   }
@@ -148,32 +143,17 @@ export function LibraryView() {
                     onClick={() => handleSort("createdAt")}
                   />
                 )}
+                <th className="w-12 px-2 py-3" aria-label="Page options" />
               </tr>
             </thead>
             <tbody>
               {displayedPages.map((page) => (
-                <tr
+                <LibraryPageRow
                   key={page.id}
-                  onClick={() => setActivePage(page.id)}
-                  className="cursor-pointer border-b border-neutral-100 transition hover:bg-white"
-                >
-                  <td className="px-4 py-3 font-medium text-neutral-900">
-                    {page.title || "Untitled"}
-                  </td>
-                  {libraryColumns.preview && (
-                    <td className="max-w-xs truncate px-4 py-3 text-neutral-500">
-                      {getPagePreview(page.content) || "—"}
-                    </td>
-                  )}
-                  {libraryColumns.lastEdited && (
-                    <td className="px-4 py-3 text-neutral-500" title={formatDate(page.updatedAt)}>
-                      {formatRelativeTime(page.updatedAt)}
-                    </td>
-                  )}
-                  {libraryColumns.created && (
-                    <td className="px-4 py-3 text-neutral-500">{formatDate(page.createdAt)}</td>
-                  )}
-                </tr>
+                  page={page}
+                  columns={libraryColumns}
+                  onOpen={() => toPage(page.id)}
+                />
               ))}
             </tbody>
           </table>

@@ -9,7 +9,6 @@ export interface Page {
   deletedAt: string | null;
 }
 
-export type AppView = "editor" | "library" | "trash";
 export type SidebarSort = "recent" | "alphabetical";
 export type LibrarySortKey = "title" | "updatedAt" | "createdAt";
 export type LibrarySortDir = "asc" | "desc";

@@ -41,6 +41,7 @@ export interface PersistedSlice {
   pages?: Page[];
   activePageId?: string | null;
   sidebarSort?: SidebarSort;
+  sidebarCollapsed?: boolean;
   libraryColumns?: Partial<LibraryPropertyVisibility & { title?: boolean }>;
 }
 
@@ -48,6 +49,7 @@ export function normalizePersistedState(state: PersistedSlice): {
   pages: Page[];
   activePageId: string | null;
   sidebarSort: SidebarSort;
+  sidebarCollapsed: boolean;
   libraryColumns: LibraryPropertyVisibility;
 } {
   const rawPages = Array.isArray(state.pages) ? state.pages : [];
@@ -58,6 +60,7 @@ export function normalizePersistedState(state: PersistedSlice): {
     pages,
     activePageId,
     sidebarSort: state.sidebarSort ?? "recent",
+    sidebarCollapsed: state.sidebarCollapsed ?? false,
     libraryColumns: normalizeLibraryProperties(state.libraryColumns),
   };
 }
@@ -128,6 +131,10 @@ export function formatDate(iso: string): string {
 export function daysUntilPurge(deletedAt: string): number {
   const purgeAt = new Date(deletedAt).getTime() + TRASH_RETENTION_MS;
   return Math.max(0, Math.ceil((purgeAt - Date.now()) / (24 * 60 * 60 * 1000)));
+}
+
+export function getPageDisplayTitle(title: string): string {
+  return title.trim() || "Untitled";
 }
 
 export function matchesSearch(page: Page, query: string): boolean {

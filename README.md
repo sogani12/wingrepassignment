@@ -29,6 +29,8 @@ Open [http://localhost:5173](http://localhost:5173).
 - Content persists to localStorage on change
 
 **Polish**
+- Collapsible sidebar (persisted preference)
+- URL routing: `/p/:pageId`, `/library`, `/trash`
 - Delete confirmation → soft delete to trash
 - Trash with restore, delete forever, and 30-day auto-purge on app load
 - Sidebar search and sort (last edited / A–Z)
@@ -40,7 +42,7 @@ Open [http://localhost:5173](http://localhost:5173).
 
 See `docs/decision-graph/` for the live decision graph, changelog, and milestone checkpoints.
 
-**Intentionally skipped:** full Notion database filters, URL-based routing, AI features, backend sync.
+**Intentionally skipped:** full Notion database filters, AI features, backend sync.
 
 ## Scripts
 

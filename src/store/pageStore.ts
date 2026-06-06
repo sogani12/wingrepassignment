@@ -10,7 +10,6 @@ import {
   type PersistedSlice,
 } from "../lib/pageUtils";
 import type {
-  AppView,
   LibraryPropertyVisibility,
   LibrarySortDir,
   LibrarySortKey,
@@ -31,24 +30,24 @@ interface PersistedState {
   pages: Page[];
   activePageId: string | null;
   sidebarSort: SidebarSort;
+  sidebarCollapsed: boolean;
   libraryColumns: LibraryPropertyVisibility;
 }
 
 interface PageStore extends PersistedState {
-  view: AppView;
   focusTarget: FocusTarget;
   librarySearch: string;
   librarySortKey: LibrarySortKey;
   librarySortDir: LibrarySortDir;
-  setView: (view: AppView) => void;
-  setActivePage: (pageId: string) => void;
-  createNewPage: () => void;
+  createNewPage: () => string;
   trashPage: (pageId: string) => void;
   restorePage: (pageId: string) => void;
   permanentDeletePage: (pageId: string) => void;
   renamePage: (pageId: string, title: string) => void;
   updatePageContent: (pageId: string, content: Block[]) => void;
   setSidebarSort: (sort: SidebarSort) => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+  toggleSidebarCollapsed: () => void;
   setLibrarySearch: (query: string) => void;
   setLibrarySort: (key: LibrarySortKey, dir: LibrarySortDir) => void;
   toggleLibraryProperty: (property: keyof LibraryPropertyVisibility) => void;
@@ -64,24 +63,21 @@ export const usePageStore = create<PageStore>()(
     (set, get) => ({
       pages: [seedPage],
       activePageId: seedPage.id,
-      view: "editor",
       focusTarget: null,
       sidebarSort: "recent",
+      sidebarCollapsed: false,
       librarySearch: "",
       librarySortKey: "updatedAt",
       librarySortDir: "desc",
       libraryColumns: DEFAULT_LIBRARY_PROPERTIES,
-      setView: (view) => set({ view }),
-      setActivePage: (pageId) =>
-        set({ activePageId: pageId, view: "editor", focusTarget: null }),
       createNewPage: () => {
         const page = createPage();
         set({
           pages: [...get().pages, page],
           activePageId: page.id,
-          view: "editor",
           focusTarget: "title",
         });
+        return page.id;
       },
       trashPage: (pageId) => {
         const now = new Date().toISOString();
@@ -99,7 +95,6 @@ export const usePageStore = create<PageStore>()(
         set({
           pages,
           activePageId: pageId,
-          view: "editor",
           focusTarget: "title",
         });
       },
@@ -130,6 +125,9 @@ export const usePageStore = create<PageStore>()(
         }));
       },
       setSidebarSort: (sort) => set({ sidebarSort: sort }),
+      setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+      toggleSidebarCollapsed: () =>
+        set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
       setLibrarySearch: (query) => set({ librarySearch: query }),
       setLibrarySort: (key, dir) => set({ librarySortKey: key, librarySortDir: dir }),
       toggleLibraryProperty: (property) =>
@@ -143,7 +141,7 @@ export const usePageStore = create<PageStore>()(
     }),
     {
       name: "wingrep-notes",
-      version: 2,
+      version: 3,
       migrate: (persisted) => {
         const state = (persisted ?? {}) as PersistedSlice;
         const rawPages = Array.isArray(state.pages)
@@ -156,6 +154,7 @@ export const usePageStore = create<PageStore>()(
           pages: rawPages.length > 0 ? rawPages : [seedPage],
           activePageId: state.activePageId ?? rawPages[0]?.id ?? seedPage.id,
           sidebarSort: state.sidebarSort,
+          sidebarCollapsed: state.sidebarCollapsed,
           libraryColumns: normalizeLibraryProperties(state.libraryColumns),
         });
       },
@@ -171,6 +170,7 @@ export const usePageStore = create<PageStore>()(
         pages: state.pages,
         activePageId: state.activePageId,
         sidebarSort: state.sidebarSort,
+        sidebarCollapsed: state.sidebarCollapsed,
         libraryColumns: state.libraryColumns,
       }),
     },

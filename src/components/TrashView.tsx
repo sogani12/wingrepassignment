@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { TRASH_RETENTION_DAYS, daysUntilPurge, formatDate, getTrashedPages } from "../lib/pageUtils";
+import { useAppNavigate } from "../hooks/useAppNavigate";
 import { usePageStore } from "../store/pageStore";
 import { ConfirmModal } from "./ConfirmModal";
 import { EmptyState } from "./EmptyState";
 
 export function TrashView() {
   const pages = usePageStore((state) => state.pages);
-  const restorePage = usePageStore((state) => state.restorePage);
+  const { restorePage } = useAppNavigate();
   const permanentDeletePage = usePageStore((state) => state.permanentDeletePage);
 
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);

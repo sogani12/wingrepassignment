@@ -17,6 +17,7 @@
     "@mantine/utils": "^6.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-router-dom": "^7.17.0",
     "zustand": "^5.0.5"
   },
   "devDependencies": {
