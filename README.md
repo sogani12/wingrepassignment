@@ -53,12 +53,6 @@ Open [http://localhost:5173](http://localhost:5173).
 - All transforms apply immediately (⌘Z to undo); custom transforms can be tested in the editor before saving
 - Hover a transform in the menu for a one-line summary
 
-## AI setup
-
-1. Copy `.env.example` to `.env.local` and set `OPENAI_API_KEY`.
-2. `npm run dev` — Vite dev middleware serves `POST /api/transform`.
-3. For production on Vercel, set `OPENAI_API_KEY` in project environment variables.
-
 ## Decisions & tradeoffs
 
 ### Architecture
@@ -96,6 +90,9 @@ LLM as a **transform engine**, not a chat sidebar — aligned with WingRep's "AI
 ### Intentionally skipped
 
 Full Notion database filters, nested outline blocks, backend page sync, real-time collaboration, and a chat-based AI UI.
+Given this project's reqs, the above just didn't seem necessary for a fully functioning deployable product. The main task for me in this project was the standout AI feature and show my attention to detail through other aspects of the UX. I took a lot of inspiration from Notion where it made sense but simplified things where I could because this product just doesn't have/need as much weight as Notion.
+
+I focused on this AI feature because it seemed meaningfully different than what Notion is currently doing. Rather than having general purpose AI commands, I wanted an abstraction that was more about saving a particular way of thinking — especially directly tied to content modifications itself. Different people have different use cases and different ways of approaching them. Giving them this kind of flexibility allows them to be more structured at any point in their note-taking journey; makes the whole process more approachable.
 
 ### Full decision history
 
