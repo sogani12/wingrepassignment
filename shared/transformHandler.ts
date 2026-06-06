@@ -2,7 +2,7 @@ import {
   buildTransformUserPrompt,
   stripMarkdownFences,
   UNIVERSAL_SYSTEM_PROMPT,
-} from "./transformPrompt";
+} from "./transformPrompt.js";
 
 export interface TransformRequest {
   name: string;
