@@ -3,7 +3,7 @@ import {
   runTransform,
   TransformApiError,
   type TransformRequest,
-} from "../shared/transformHandler.ts";
+} from "../shared/transformHandler";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
