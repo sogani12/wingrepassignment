@@ -1,10 +1,13 @@
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
-import { useCreateBlockNote } from "@blocknote/react";
+import { FormattingToolbarController, useCreateBlockNote } from "@blocknote/react";
 import { memo, useEffect } from "react";
 import type { Page } from "../types/page";
 import { usePageStore } from "../store/pageStore";
+import { CustomFormattingToolbar } from "./editor/CustomFormattingToolbar";
+import { TransformOverlays } from "./editor/TransformOverlays";
+import { TransformProvider } from "./editor/TransformContext";
 
 interface PageEditorProps {
   page: Page;
@@ -27,7 +30,14 @@ export const PageEditor = memo(function PageEditor({ page }: PageEditorProps) {
 
   return (
     <div className="page-editor">
-      <BlockNoteView editor={editor} theme="light" />
+      <TransformProvider editor={editor}>
+        <BlockNoteView editor={editor} theme="light" formattingToolbar={false}>
+          <FormattingToolbarController
+            formattingToolbar={CustomFormattingToolbar}
+          />
+          <TransformOverlays />
+        </BlockNoteView>
+      </TransformProvider>
     </div>
   );
 });

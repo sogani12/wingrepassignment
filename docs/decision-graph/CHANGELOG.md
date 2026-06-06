@@ -10,3 +10,4 @@ One line per update. Milestone snapshots live in `checkpoints/`.
 - **2026-06-05** — URL routing (react-router-dom: /p/:id, /library, /trash) + collapsible sidebar (persisted). Resolved q_page_routing; superseded dec_single_route.
 - **2026-06-05** — Collapsed sidebar: Library + trash icon only; removed + and Pg shortcuts from icon rail.
 - **2026-06-05** — Cmd+K quick search modal; page ⋯ menu (rename/trash) in sidebar + library; trash toast with restore (no delete confirm).
+- **2026-06-05** — AI transform engine: gpt-4o-mini via /api/transform, formatting toolbar button, presets + custom transforms (persisted), preview for custom transforms. Resolved q_ai_scope.

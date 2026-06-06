@@ -1,6 +1,6 @@
 {
   "version": "live",
-  "updated_at": "2026-06-05-polish",
+  "updated_at": "2026-06-05-ai-transforms",
   "nodes": [
     {
       "id": "obj_core_requirements",
@@ -353,11 +353,78 @@
       "blocks": []
     },
     {
+      "id": "dec_ai_transform_engine",
+      "type": "decision",
+      "label": "LLM transform engine on selection",
+      "description": "Highlight text → Transform button → preset or custom transform → replace selection with structured markdown blocks via gpt-4o-mini.",
+      "rationale": "WingRep thesis: AI does real work on document structure, not chat summaries. Vercel serverless hides API key.",
+      "alternatives_considered": ["Client-side API key", "Chat sidebar", "Defer to v2"]
+    },
+    {
+      "id": "dec_transform_scope",
+      "type": "decision",
+      "label": "Expand partial selection to full blocks",
+      "description": "Use BlockNote getSelection() so partial highlights within or across blocks transform whole block(s).",
+      "rationale": "Transforms need coherent units; BlockNote API handles cross-block expansion natively.",
+      "alternatives_considered": ["Sentence-level splice", "Exact partial replace"]
+    },
+    {
+      "id": "comp_transform_api",
+      "type": "component",
+      "label": "Transform API route",
+      "description": "Vercel serverless /api/transform plus Vite dev middleware; shared handler in shared/transformHandler.ts.",
+      "file_refs": ["api/transform.ts", "shared/transformHandler.ts", "vite.config.ts"],
+      "has_tests": false
+    },
+    {
+      "id": "comp_transform_ui",
+      "type": "component",
+      "label": "Transform UI",
+      "description": "Formatting toolbar button, transform menu, custom transform editor, preview modal for custom transforms.",
+      "file_refs": [
+        "src/components/editor/TransformButton.tsx",
+        "src/components/editor/TransformMenu.tsx",
+        "src/components/editor/TransformEditorModal.tsx",
+        "src/components/editor/TransformPreviewModal.tsx",
+        "src/components/editor/TransformContext.tsx"
+      ],
+      "has_tests": false
+    },
+    {
+      "id": "comp_transform_store",
+      "type": "component",
+      "label": "Transform store",
+      "description": "Zustand persist for up to 20 custom transforms with name, description, and derived hover summary.",
+      "file_refs": ["src/store/transformStore.ts", "src/lib/transformPresets.ts"],
+      "has_tests": false
+    },
+    {
+      "id": "iface_transform_api",
+      "type": "interface",
+      "label": "Transform API contract",
+      "description": "POST /api/transform with name, description, inputMarkdown; returns { markdown }.",
+      "contract": "{ name, description, inputMarkdown } → { markdown }"
+    },
+    {
+      "id": "ux_transform_menu",
+      "type": "ux_decision",
+      "label": "Transform menu with hover summaries",
+      "description": "Presets + custom transforms in floating menu; title tooltip shows one-line summary. Custom transforms preview before apply."
+    },
+    {
+      "id": "tst_transform_flow",
+      "type": "test",
+      "label": "Manual transform flow QA",
+      "description": "Highlight text → preset replaces blocks; custom transform test/save/preview/apply; API error surfaces toast.",
+      "test_type": "end-to-end",
+      "status": "planned"
+    },
+    {
       "id": "q_ai_scope",
       "type": "question",
       "label": "Ship AI in 48h or defer?",
-      "description": "Whether to add a block-transforming AI feature or document it as v2.",
-      "status": "open",
+      "description": "Resolved: LLM transform engine shipped with presets and custom transforms.",
+      "status": "resolved",
       "priority": "medium",
       "blocks": []
     },
@@ -408,6 +475,19 @@
     { "type": "resolves", "source": "dec_hydration_gate", "target": "risk_hydration_race" },
     { "type": "guards_against", "source": "tst_reload_persistence", "target": "risk_hydration_race" },
     { "type": "guards_against", "source": "tst_reload_persistence", "target": "risk_storage_migration" },
-    { "type": "conflicts_with", "source": "risk_ai_scope", "target": "obj_core_requirements" }
+    { "type": "conflicts_with", "source": "risk_ai_scope", "target": "obj_core_requirements" },
+    { "type": "resolves", "source": "dec_ai_transform_engine", "target": "q_ai_scope" },
+    { "type": "resolves", "source": "dec_ai_transform_engine", "target": "risk_ai_scope" },
+    { "type": "motivated_by", "source": "dec_ai_transform_engine", "target": "obj_show_decision_process" },
+    { "type": "implements", "source": "comp_transform_api", "target": "dec_ai_transform_engine" },
+    { "type": "implements", "source": "comp_transform_ui", "target": "dec_ai_transform_engine" },
+    { "type": "implements", "source": "comp_transform_store", "target": "dec_ai_transform_engine" },
+    { "type": "exposes", "source": "comp_transform_api", "target": "iface_transform_api" },
+    { "type": "consumes", "source": "comp_transform_ui", "target": "iface_transform_api" },
+    { "type": "depends_on", "source": "comp_transform_ui", "target": "comp_page_editor" },
+    { "type": "depends_on", "source": "comp_transform_ui", "target": "comp_transform_store" },
+    { "type": "depends_on", "source": "comp_transform_api", "target": "dec_transform_scope" },
+    { "type": "verifies", "source": "tst_transform_flow", "target": "comp_transform_ui" },
+    { "type": "verifies", "source": "tst_transform_flow", "target": "comp_transform_api" }
   ]
 }
