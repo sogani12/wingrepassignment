@@ -11,7 +11,7 @@ interface PageListItemProps {
 }
 
 export function PageListItem({ page, isActive, onOpen }: PageListItemProps) {
-  const { moveToTrash, rename } = usePageActions();
+  const { moveToTrash, rename, toggleFavorite } = usePageActions();
   const [menuOpen, setMenuOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(page.title);
@@ -99,7 +99,9 @@ export function PageListItem({ page, isActive, onOpen }: PageListItemProps) {
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         onRename={() => setRenaming(true)}
+        onToggleFavorite={() => toggleFavorite(page.id)}
         onDelete={() => moveToTrash(page.id)}
+        isFavorited={page.favorited}
         anchorRef={rowRef}
         className="left-2 right-auto"
       />

@@ -26,6 +26,16 @@ export function Sidebar() {
     return sorted.filter((page) => matchesSearch(page, search));
   }, [activePages, sidebarSort, search]);
 
+  const favoritePages = useMemo(
+    () => filteredPages.filter((page) => page.favorited),
+    [filteredPages],
+  );
+
+  const recentPages = useMemo(
+    () => filteredPages.filter((page) => !page.favorited),
+    [filteredPages],
+  );
+
   if (sidebarCollapsed) {
     return (
       <aside className="flex h-full w-14 shrink-0 flex-col items-center border-r border-neutral-200 bg-white py-3">
@@ -95,10 +105,7 @@ export function Sidebar() {
 
       {view === "editor" && (
         <>
-          <div className="flex items-center justify-between px-4 py-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
-              Recent
-            </span>
+          <div className="flex items-center justify-end px-4 py-2">
             <select
               value={sidebarSort}
               onChange={(event) =>
@@ -118,16 +125,44 @@ export function Sidebar() {
                 {search ? "No pages match your search" : "No pages yet"}
               </p>
             ) : (
-              <ul className="space-y-0.5">
-                {filteredPages.map((page) => (
-                  <PageListItem
-                    key={page.id}
-                    page={page}
-                    isActive={page.id === activePageId && view === "editor"}
-                    onOpen={() => toPage(page.id)}
-                  />
-                ))}
-              </ul>
+              <>
+                {favoritePages.length > 0 && (
+                  <div className="mb-3">
+                    <p className="mb-1 px-3 text-xs font-medium uppercase tracking-wide text-neutral-400">
+                      Favorites
+                    </p>
+                    <ul className="space-y-0.5">
+                      {favoritePages.map((page) => (
+                        <PageListItem
+                          key={page.id}
+                          page={page}
+                          isActive={page.id === activePageId && view === "editor"}
+                          onOpen={() => toPage(page.id)}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {recentPages.length > 0 && (
+                  <div>
+                    {favoritePages.length > 0 && (
+                      <p className="mb-1 px-3 text-xs font-medium uppercase tracking-wide text-neutral-400">
+                        Recent
+                      </p>
+                    )}
+                    <ul className="space-y-0.5">
+                      {recentPages.map((page) => (
+                        <PageListItem
+                          key={page.id}
+                          page={page}
+                          isActive={page.id === activePageId && view === "editor"}
+                          onOpen={() => toPage(page.id)}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
             )}
           </nav>
         </>

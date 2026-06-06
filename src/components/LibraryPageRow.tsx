@@ -17,7 +17,7 @@ interface LibraryPageRowProps {
 }
 
 export function LibraryPageRow({ page, columns, onOpen }: LibraryPageRowProps) {
-  const { moveToTrash, rename } = usePageActions();
+  const { moveToTrash, rename, toggleFavorite } = usePageActions();
   const [menuOpen, setMenuOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(page.title);
@@ -120,7 +120,9 @@ export function LibraryPageRow({ page, columns, onOpen }: LibraryPageRowProps) {
           open={menuOpen}
           onClose={() => setMenuOpen(false)}
           onRename={() => setRenaming(true)}
+          onToggleFavorite={() => toggleFavorite(page.id)}
           onDelete={() => moveToTrash(page.id)}
+          isFavorited={page.favorited}
           anchorRef={rowRef}
           className="right-0"
         />

@@ -7,6 +7,7 @@ export interface Page {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  favorited: boolean;
 }
 
 export type SidebarSort = "recent" | "alphabetical";

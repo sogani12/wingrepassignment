@@ -65,13 +65,20 @@ export function normalizePersistedState(state: PersistedSlice): {
   };
 }
 
-export function migratePage(page: Page & { createdAt?: string; deletedAt?: string | null }): Page {
+export function migratePage(
+  page: Page & { createdAt?: string; deletedAt?: string | null; favorited?: boolean },
+): Page {
   const fallback = page.updatedAt ?? new Date().toISOString();
   return {
     ...page,
     createdAt: page.createdAt ?? fallback,
     deletedAt: page.deletedAt ?? null,
+    favorited: page.favorited ?? false,
   };
+}
+
+export function getFavoritePages(pages: Page[]): Page[] {
+  return getActivePages(pages).filter((page) => page.favorited);
 }
 
 export function sortPages(pages: Page[], sort: SidebarSort): Page[] {

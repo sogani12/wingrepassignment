@@ -11,6 +11,7 @@ export { getPageDisplayTitle };
 export function usePageActions() {
   const trashPage = usePageStore((state) => state.trashPage);
   const renamePage = usePageStore((state) => state.renamePage);
+  const togglePageFavorite = usePageStore((state) => state.togglePageFavorite);
   const showTrashToast = useToastStore((state) => state.showTrashToast);
   const { toPage, toLibrary, restorePage } = useAppNavigate();
   const location = useLocation();
@@ -53,5 +54,12 @@ export function usePageActions() {
     [renamePage],
   );
 
-  return { moveToTrash, restoreFromToast, rename };
+  const toggleFavorite = useCallback(
+    (pageId: string) => {
+      togglePageFavorite(pageId);
+    },
+    [togglePageFavorite],
+  );
+
+  return { moveToTrash, restoreFromToast, rename, toggleFavorite };
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { getActivePages, matchesSearch } from "../lib/pageUtils";
 import type { LibrarySortKey, Page } from "../types/page";
 import { useAppNavigate } from "../hooks/useAppNavigate";
@@ -9,10 +9,12 @@ import { LibraryPageRow } from "./LibraryPageRow";
 export function LibraryView() {
   const pages = usePageStore((state) => state.pages);
   const librarySearch = usePageStore((state) => state.librarySearch);
+  const libraryFavoritesOnly = usePageStore((state) => state.libraryFavoritesOnly);
   const librarySortKey = usePageStore((state) => state.librarySortKey);
   const librarySortDir = usePageStore((state) => state.librarySortDir);
   const libraryColumns = usePageStore((state) => state.libraryColumns);
   const setLibrarySearch = usePageStore((state) => state.setLibrarySearch);
+  const setLibraryFavoritesOnly = usePageStore((state) => state.setLibraryFavoritesOnly);
   const setLibrarySort = usePageStore((state) => state.setLibrarySort);
   const toggleLibraryProperty = usePageStore((state) => state.toggleLibraryProperty);
   const { toPage, createPage } = useAppNavigate();
@@ -23,9 +25,12 @@ export function LibraryView() {
   const activePages = getActivePages(pages);
 
   const displayedPages = useMemo(() => {
-    const filtered = activePages.filter((page) => matchesSearch(page, librarySearch));
+    const filtered = activePages.filter((page) => {
+      if (libraryFavoritesOnly && !page.favorited) return false;
+      return matchesSearch(page, librarySearch);
+    });
     return [...filtered].sort((a, b) => comparePages(a, b, librarySortKey, librarySortDir));
-  }, [activePages, librarySearch, librarySortKey, librarySortDir]);
+  }, [activePages, librarySearch, libraryFavoritesOnly, librarySortKey, librarySortDir]);
 
   useEffect(() => {
     if (!propertiesOpen) return;
@@ -79,6 +84,25 @@ export function LibraryView() {
             className="min-w-64 flex-1 rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-neutral-400"
           />
 
+          <div
+            className="flex rounded-lg border border-neutral-200 p-0.5"
+            role="group"
+            aria-label="Filter pages"
+          >
+            <FilterButton
+              active={!libraryFavoritesOnly}
+              onClick={() => setLibraryFavoritesOnly(false)}
+            >
+              All
+            </FilterButton>
+            <FilterButton
+              active={libraryFavoritesOnly}
+              onClick={() => setLibraryFavoritesOnly(true)}
+            >
+              ★ Favorites
+            </FilterButton>
+          </div>
+
           <div ref={propertiesRef} className="relative">
             <button
               type="button"
@@ -113,7 +137,13 @@ export function LibraryView() {
       {displayedPages.length === 0 ? (
         <EmptyState
           title="No results"
-          description="Try a different search term."
+          description={
+            libraryFavoritesOnly
+              ? librarySearch
+                ? "No favorite pages match your search."
+                : "Favorite a page from the ⋯ menu to see it here."
+              : "Try a different search term."
+          }
         />
       ) : (
         <div className="flex-1 overflow-auto px-8 py-4">
@@ -200,6 +230,31 @@ function SortableHeader({
         {active && <span className="text-neutral-500">{dir === "asc" ? "↑" : "↓"}</span>}
       </button>
     </th>
+  );
+}
+
+function FilterButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`rounded-md px-3 py-1.5 text-sm transition ${
+        active
+          ? "bg-neutral-100 font-medium text-neutral-900"
+          : "text-neutral-500 hover:text-neutral-700"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 

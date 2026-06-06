@@ -24,6 +24,7 @@ export function createPage(title = ""): Page {
     createdAt: now,
     updatedAt: now,
     deletedAt: null,
+    favorited: false,
   };
 }
 

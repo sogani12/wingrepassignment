@@ -37,6 +37,7 @@ interface PersistedState {
 interface PageStore extends PersistedState {
   focusTarget: FocusTarget;
   librarySearch: string;
+  libraryFavoritesOnly: boolean;
   librarySortKey: LibrarySortKey;
   librarySortDir: LibrarySortDir;
   createNewPage: () => string;
@@ -44,11 +45,13 @@ interface PageStore extends PersistedState {
   restorePage: (pageId: string) => void;
   permanentDeletePage: (pageId: string) => void;
   renamePage: (pageId: string, title: string) => void;
+  togglePageFavorite: (pageId: string) => void;
   updatePageContent: (pageId: string, content: Block[]) => void;
   setSidebarSort: (sort: SidebarSort) => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleSidebarCollapsed: () => void;
   setLibrarySearch: (query: string) => void;
+  setLibraryFavoritesOnly: (favoritesOnly: boolean) => void;
   setLibrarySort: (key: LibrarySortKey, dir: LibrarySortDir) => void;
   toggleLibraryProperty: (property: keyof LibraryPropertyVisibility) => void;
   clearFocusTarget: () => void;
@@ -67,6 +70,7 @@ export const usePageStore = create<PageStore>()(
       sidebarSort: "recent",
       sidebarCollapsed: false,
       librarySearch: "",
+      libraryFavoritesOnly: false,
       librarySortKey: "updatedAt",
       librarySortDir: "desc",
       libraryColumns: DEFAULT_LIBRARY_PROPERTIES,
@@ -112,6 +116,13 @@ export const usePageStore = create<PageStore>()(
           ),
         }));
       },
+      togglePageFavorite: (pageId) => {
+        set((state) => ({
+          pages: state.pages.map((page) =>
+            page.id === pageId ? { ...page, favorited: !page.favorited } : page,
+          ),
+        }));
+      },
       updatePageContent: (pageId, content) => {
         const existing = get().pages.find((page) => page.id === pageId);
         if (existing && blocksEqual(existing.content, content)) return;
@@ -129,6 +140,8 @@ export const usePageStore = create<PageStore>()(
       toggleSidebarCollapsed: () =>
         set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
       setLibrarySearch: (query) => set({ librarySearch: query }),
+      setLibraryFavoritesOnly: (favoritesOnly) =>
+        set({ libraryFavoritesOnly: favoritesOnly }),
       setLibrarySort: (key, dir) => set({ librarySortKey: key, librarySortDir: dir }),
       toggleLibraryProperty: (property) =>
         set((state) => ({
@@ -141,7 +154,7 @@ export const usePageStore = create<PageStore>()(
     }),
     {
       name: "wingrep-notes",
-      version: 3,
+      version: 4,
       migrate: (persisted) => {
         const state = (persisted ?? {}) as PersistedSlice;
         const rawPages = Array.isArray(state.pages)
